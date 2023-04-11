@@ -1,2 +1,6 @@
-mongrail: read_indv_data.c
-	gcc -g -Wall -o mongrail read_indv_data.c -lm `pkg-config --cflags --libs glib-2.0`
+CC = gcc
+
+mongrail: mongrail.c
+	$(CC) -g -Wall -o mongrail mongrail.c -lm `pkg-config --cflags --libs glib-2.0`
+clean:
+	$(RM) mongrail.o
