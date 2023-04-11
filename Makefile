@@ -1,6 +1,18 @@
-CC = gcc
+CC = cc
+VPATH = src include
+FLAGS = 
+
+all: gendiplo mongrail
+
+debug: FLAGS += -g -Wall
+debug: all
+
+gendiplo: gendiplo.c
+	$(CC) $(FLAGS) -o gendiplo $< -I include -lm
 
 mongrail: mongrail.c
-	$(CC) -g -Wall -o mongrail mongrail.c -lm `pkg-config --cflags --libs glib-2.0`
+	$(CC) $(FLAGS) -o mongrail $< -lm `pkg-config --cflags --libs glib-2.0`
+
+
 clean:
-	$(RM) mongrail.o
+	$(RM) mongrail gendiplo
