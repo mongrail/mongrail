@@ -2,7 +2,7 @@
 # probability at the end
 
 BEGIN{
-    printf("%s\t\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\n","Scaffold Name","PostProb(a)","PostProb(b)","PostProb(c)","PostProb(d)","PostProb(e)","PostProb(f)")
+    printf("%s\t\t%-s\t%-s\t%-s\t%-s\t%-s\t%-s\n","Region","PostPr(a)","PostPr(b)","PostPr(c)","PostPr(d)","PostPr(e)","PostPr(f)")
     # printf("----------------------------------------\n\n")
 }
 
@@ -33,7 +33,7 @@ BEGIN{
 
 END{
     # printf("-----------------------------------------\n\n")
-    printf("%s\t\t","Final Post Prob")
+    printf("%s\t\t","PostProb(all)")
     for (item in sum){
 	combined_denom=combined_denom+exp(sum[item])
     }

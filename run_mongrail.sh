@@ -254,18 +254,23 @@ function create_PostProb
     sample_hyb=`bcftools query -l ${input_hyb} | awk '{print $1}'`
     verbose_output="post_prob.txt"
     output="output.txt"
+    post_prob_all_strings="Indiv PostPr(a) PostPr(b) PostPr(c) PostPr(d) PostPr(e) PostPr(f)"
+    post_prob_all_strings+=$'\n'
     while read -r hybrid_name
     do
 	hybrid_lklhd_filename="${hybrid_name}.lklhd"
-	header="Individual: ${hybrid_name}"
+	header="Indiv: ${hybrid_name}"
 	echo -e "${header}\n" >> ${verbose_output}
 	post_prob_output=`awk -f ./scripts/post_prob.awk ${hybrid_lklhd_filename}`
-	echo "${post_prob_output}" >> ${verbose_output}
+	echo "${post_prob_output}" | column -t >> ${verbose_output}
 	echo -e "\n\n" >> ${verbose_output}
-	last_line=`echo "${post_prob_output}" | tail -1 | sed "s/Final Post Prob/${hybrid_name}/g"`
-	echo "${last_line}" >> ${output}
+	last_line=`echo "${post_prob_output}" | tail -1 | sed "s/PostProb(all)/${hybrid_name}/g"`
+	# echo "${last_line}" | column -t >> ${output}
+	post_prob_all_strings+=`echo "${last_line}"`
+	post_prob_all_strings+=$'\n'
     done < <(echo "${sample_hyb}")
-    
+
+    echo "${post_prob_all_strings}" | column -t > ${output}
 
 }
 
@@ -295,19 +300,19 @@ while getopts ':A:B:i:r:R:h' opt; do
         
 	h)
             echo -e "mongrail v1.0.0 mongrail\nhttps://github.com/mongrail/mongrail\n"
-            echo "Usage: ./$(basename $0) [-A FILENAME] [-B FILENAME] [-i FILENAME] [-r VALUE] [-R FILENAME]"
+            echo "Usage: ./$(basename $0) [-A FILENAME] [-B FILENAME] [-i FILENAME] [-r VALUE | -R FILENAME]"
             exit 0                                                                           
             ;;                                                                               
         
 	:)
 	    echo -e "mongrail v1.0.0 mongrail\nhttps://github.com/mongrail/mongrail\n"
-            echo -e "ERROR: Option requires an argument.\nUsage: ./$(basename $0) [-A FILENAME] [-B FILENAME] [-i FILENAME] [-r VALUE] [-R FILENAME]"
+            echo -e "ERROR: Option requires an argument.\nUsage: ./$(basename $0) [-A FILENAME] [-B FILENAME] [-i FILENAME] [-r VALUE | -R FILENAME]"
             exit 1                                                                           
             ;;                                                                               
         
 	?)
 	echo -e "mongrail v1.0.0 mongrail\nhttps://github.com/mongrail/mongrail\n"
-	echo -e "ERROR: Invalid command option.\nUsage: ./$(basename $0) [-A FILENAME] [-B FILENAME] [-i FILENAME] [-r VALUE] [-R FILENAME]"
+	echo -e "ERROR: Invalid command option.\nUsage: ./$(basename $0) [-A FILENAME] [-B FILENAME] [-i FILENAME] [-r VALUE | -R FILENAME]"
 	exit 1                                                                               
 	;;                                                                                   
     esac                                                                                     
@@ -320,10 +325,10 @@ then
     if ((OPTIND == 1))                                                                     
     then
         echo -e "mongrail v1.0.0 mongrail\nhttps://github.com/mongrail/mongrail\n"
-        echo -e "ERROR: No options specified!\nUsage: ./$(basename $0) [-A FILENAME] [-B FILENAME] [-i FILENAME] [-r VALUE] [-R FILENAME]"
+        echo -e "ERROR: No options specified!\nUsage: ./$(basename $0) [-A FILENAME] [-B FILENAME] [-i FILENAME] [-r VALUE | -R FILENAME]"
     else
         echo -e "mongrail v1.0.0 mongrail\nhttps://github.com/mongrail/mongrail\n"
-        echo -e "ERROR: All options not specified!\nUsage: ./$(basename $0) [-A FILENAME] [-B FILENAME] [-i FILENAME] [-r VALUE] [-R FILENAME]"
+        echo -e "ERROR: All options not specified!\nUsage: ./$(basename $0) [-A FILENAME] [-B FILENAME] [-i FILENAME] [-r VALUE | -R FILENAME]"
     fi                                                                                     
     exit 1                                                                                 
 fi                       
@@ -350,3 +355,5 @@ mv *.GT ./tmp/
 mv *.sim ./tmp/
 mv *.out ./tmp/
 mv *.lklhd ./tmp/
+
+echo ""
