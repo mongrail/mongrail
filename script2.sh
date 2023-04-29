@@ -293,7 +293,7 @@ function create_PostProb
 	post_prob_all_strings+=$'\n'
     done < <(echo "${sample_hyb}")
 
-    echo "${post_prob_all_strings}" | column -t > ${output}
+    echo "${post_prob_all_strings}" | column -t >> ${output}
 
 }
 
@@ -356,6 +356,9 @@ then
     exit 1                                                                                 
 fi                       
 
+
+echo "$(date +%F)" > post_prob.txt
+echo "$(date +%F)" > output.txt 
 
 no_marker_scaffold=`bcftools query -f '%CHROM\n' ${popA} | uniq -c`
 # scaffold_name=`echo "${no_marker_scaffold}" | awk 'BEGIN{ORS="\n"}{print $2}'`
