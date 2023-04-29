@@ -20,9 +20,12 @@ function vcf_to_GT
     sample_hyb=`bcftools query -l ${input_hyb} | awk 'BEGIN{ORS="\t"} {print $1}'`
     # scaffold_info=`bcftools query -f '%CHROM\n' ${input_popA} | uniq -c`
     
-    header_popA=`echo chrom:pos$'\t'${sample_popA}`                              
-    header_popB=`echo chrom:pos$'\t'${sample_popB}`                              
-    header_hyb=`echo chrom:pos$'\t'${sample_hyb}`
+    header_popA="chrom:pos\t${sample_popA}"                              
+    header_popB="chrom:pos\t${sample_popB}"
+    header_hyb="chrom:pos\t${sample_hyb}"
+
+
+
     
     while read -r n_markers scaffold_name                                        
     do                                                                           
@@ -31,10 +34,16 @@ function vcf_to_GT
 	output_GT_popB="B_${scaffold_name}.GT"                                   
 	output_GT_hyb="H_${scaffold_name}.GT"                                    
         
-	echo "${header_popA}" > ${output_GT_popA}                                
-	echo "${header_popB}" > ${output_GT_popB}                                
-	echo "${header_hyb}" > ${output_GT_hyb}                                  
-        
+	# echo "${header_popA}" > ${output_GT_popA}
+	# echo "${header_popB}" > ${output_GT_popB}
+	# echo "${header_hyb}" > ${output_GT_hyb}
+
+	printf "chrom:pos\t%s\n" "${sample_popA}" > ${output_GT_popA}
+	printf "chrom:pos\t%s\n" "${sample_popB}" > ${output_GT_popB}
+	printf "chrom:pos\t%s\n" "${sample_hyb}" > ${output_GT_hyb}
+	# printf "%s\n" ${header_popB} > ${output_GT_popB}
+	# printf "%s\n" ${header_hyb} > ${output_GT_hyb}
+	
 	if [[ ${n_markers} -le 10 ]]                                             
 	then                                                                     
 	    bcftools query -r ${scaffold_name} -f '%CHROM:%POS\t\t[\t%GT]\n' ${input_popA} >> ${output_GT_popA}
@@ -45,9 +54,16 @@ function vcf_to_GT
 	    bcftools query -r ${scaffold_name} -f '%CHROM:%POS\t\t[\t%GT]\n' ${input_popA} >> ${output_GT_popA}
 	    bcftools query -r ${scaffold_name} -f '%CHROM:%POS\t\t[\t%GT]\n' ${input_popB} >> ${output_GT_popB}
 	    bcftools query -r ${scaffold_name} -f '%CHROM:%POS\t\t[\t%GT]\n' ${input_hyb} >> ${output_GT_hyb}
-	    sed -i -n '1,11p' ${output_GT_popA}
-	    sed -i -n '1,11p' ${output_GT_popB}
-	    sed -i -n '1,11p' ${output_GT_hyb} 
+	    # sed -i -n '1,11p' ${output_GT_popA}
+	    # sed -i -n '1,11p' ${output_GT_popB}
+	    # sed -i -n '1,11p' ${output_GT_hyb}
+
+	    sed -n '1,11p' ${output_GT_popA} > tmp_A.txt
+	    cat tmp_A.txt > ${output_GT_popA}
+	    sed -n '1,11p' ${output_GT_popB} > tmp_B.txt
+	    cat tmp_B.txt > ${output_GT_popB}
+	    sed -n '1,11p' ${output_GT_hyb} > tmp_hyb.txt
+	    cat tmp_hyb.txt > ${output_GT_hyb}
 	fi
     done < <(echo "${scaffold_info}")
 
@@ -72,15 +88,17 @@ function create_chrom
     	    then                                                                       
     		last_marker=`echo "${markers}" | awk '{print ($NF+(10**6))/(10**6)}'`  
     		chrom_length=`echo "${last_marker}/1" | bc`                            
-    		chrom_info=`echo 1$'\t'${chrom_length}$'\t'${recom_rate}$'\t'${n_marker}$'\t'${markers}`
-    		echo "${chrom_info}" > ${chrom_filename}
+    		# chrom_info=`echo 1$'\t'${chrom_length}$'\t'${recom_rate}$'\t'${n_marker}$'\t'${markers}`
+    		# echo "${chrom_info}" > ${chrom_filename}		
+		printf "1\t${chrom_length}\t${recom_rate}\t${n_marker}\t${markers}\n" > ${chrom_filename}
     	    else                                                                       
     		truncated_n_marker=10
     		ten_markers=`echo "${markers}" | awk 'BEGIN{ORS="\t"}{for(i=1; i<=10; i++) print $i}'`
     		last_marker=`echo "${ten_markers}" | awk '{print ($NF+(10**6))/(10**6)}'`
     		chrom_length=`echo "${last_marker}/1" | bc`
-    		chrom_info=`echo 1$'\t'${chrom_length}$'\t'${recom_rate}$'\t'${truncated_n_marker}$'\t'${ten_markers}`
-    		echo "${chrom_info}" > ${chrom_filename}                                                  
+    		# chrom_info=`echo 1$'\t'${chrom_length}$'\t'${recom_rate}$'\t'${truncated_n_marker}$'\t'${ten_markers}`
+    		# echo "${chrom_info}" > ${chrom_filename}
+		printf "1\t${chrom_length}\t${recom_rate}\t${truncated_n_marker}\t${ten_markers}\n" > ${chrom_filename}
     	    fi
     	    # sed -i "s/${scaffold_name}/1/g" ${chrom_filename}
     	done < <(echo "${input_recom_file}")
@@ -99,15 +117,17 @@ function create_chrom
     	    then                                                                       
     		last_marker=`echo "${markers}" | awk '{print ($NF+(10**6))/(10**6)}'`  
     		chrom_length=`echo "${last_marker}/1" | bc`                            
-    		chrom_info=`echo 1$'\t'${chrom_length}$'\t'${recom_rate}$'\t'${n_marker}$'\t'${markers}`
-    		echo "${chrom_info}" > ${chrom_filename}
+    		# chrom_info=`echo 1$'\t'${chrom_length}$'\t'${recom_rate}$'\t'${n_marker}$'\t'${markers}`
+    		# echo "${chrom_info}" > ${chrom_filename}
+		printf "1\t${chrom_length}\t${recom_rate}\t${n_marker}\t${markers}\n" > ${chrom_filename}
     	    else                                                                       
     		truncated_n_marker=10
     		ten_markers=`echo "${markers}" | awk 'BEGIN{ORS="\t"}{for(i=1; i<=10; i++) print $i}'`
     		last_marker=`echo "${ten_markers}" | awk '{print ($NF+(10**6))/(10**6)}'`
     		chrom_length=`echo "${last_marker}/1" | bc`
-    		chrom_info=`echo 1$'\t'${chrom_length}$'\t'${recom_rate}$'\t'${truncated_n_marker}$'\t'${ten_markers}`
-    		echo "${chrom_info}" > ${chrom_filename}                                                  
+    		# chrom_info=`echo 1$'\t'${chrom_length}$'\t'${recom_rate}$'\t'${truncated_n_marker}$'\t'${ten_markers}`
+    		# echo "${chrom_info}" > ${chrom_filename}
+		printf "1\t${chrom_length}\t${recom_rate}\t${truncated_n_marker}\t${ten_markers}\n" > ${chrom_filename}
     	    fi
     	    # sed -i "s/${scaffold_name}/1/g" ${chrom_filename}
     	done < <(echo "${scaffold_info}")
@@ -181,8 +201,8 @@ function create_pop_sim
 	    indv_all_dip=`echo "${indv_header}" | ./scripts/transpose.sh`                         
 	    echo "${indv_all_dip}" > "${indv_filename}"
 	    
-            grep 'chrom:pos' ${indv_filename} > tmp2.txt
-	    sed "s/${scaffold_name}/1/g" ${indv_filename} >> tmp2.txt
+            # grep 'chrom:pos' ${indv_filename} > tmp2.txt
+	    sed "s/${scaffold_name}/1/g" ${indv_filename} > tmp2.txt
 	    cat tmp2.txt > ${indv_filename}
 	done
 
