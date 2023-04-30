@@ -9,8 +9,8 @@ NR != 1{
 }
 
 END{
-    for (item in sum){
-	printf("%f\t",log(sum[item]))
+    for (i = 1; i <= 6; i++){
+	printf("%f\t",log(sum[i]))
     }
     printf("\n")
 }
