@@ -10,7 +10,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 ## Availability
 
-The current version of Mongrail is available from ?
+The current version of Mongrail is available from [current release](https://github.com/mongrail/mongrail/archive/refs/tags/v1.0.0.tar.gz).
 
 ## Manual
 
@@ -21,7 +21,7 @@ The program manual is available at the [Mongrail wiki](https://github.com/mongra
 ### To Download the program
 
 ```
-wget ? ; tar -xvzf mongrail-*.tar.gz ; cd mongrail-* ; make all
+wget https://github.com/mongrail/mongrail/archive/refs/tags/v1.0.0.tar.gz ; tar -xvzf mongrail-*.tar.gz ; cd mongrail-* ; make all
 
 ```
 
