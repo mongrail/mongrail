@@ -38,32 +38,40 @@ function vcf_to_GT
 	# echo "${header_popB}" > ${output_GT_popB}
 	# echo "${header_hyb}" > ${output_GT_hyb}
 
-	printf "chrom:pos\t%s\n" "${sample_popA}" > ${output_GT_popA}
-	printf "chrom:pos\t%s\n" "${sample_popB}" > ${output_GT_popB}
-	printf "chrom:pos\t%s\n" "${sample_hyb}" > ${output_GT_hyb}
+	touch tmp/${output_GT_popA}
+	touch tmp/${output_GT_popB}
+	touch tmp/${output_GT_hyb}
+	
+	printf "chrom:pos\t%s\n" "${sample_popA}" > tmp/${output_GT_popA}
+	printf "chrom:pos\t%s\n" "${sample_popB}" > tmp/${output_GT_popB}
+	printf "chrom:pos\t%s\n" "${sample_hyb}" > tmp/${output_GT_hyb}
 	# printf "%s\n" ${header_popB} > ${output_GT_popB}
 	# printf "%s\n" ${header_hyb} > ${output_GT_hyb}
 	
 	if [[ ${n_markers} -le 10 ]]                                             
 	then                                                                     
-	    bcftools query -r ${scaffold_name} -f '%CHROM:%POS\t\t[\t%GT]\n' ${input_popA} >> ${output_GT_popA}
-	    bcftools query -r ${scaffold_name} -f '%CHROM:%POS\t\t[\t%GT]\n' ${input_popB} >> ${output_GT_popB}
-	    bcftools query -r ${scaffold_name} -f '%CHROM:%POS\t\t[\t%GT]\n' ${input_hyb} >> ${output_GT_hyb}
+	    bcftools query -r ${scaffold_name} -f '%CHROM:%POS\t\t[\t%GT]\n' ${input_popA} >> tmp/${output_GT_popA}
+	    bcftools query -r ${scaffold_name} -f '%CHROM:%POS\t\t[\t%GT]\n' ${input_popB} >> tmp/${output_GT_popB}
+	    bcftools query -r ${scaffold_name} -f '%CHROM:%POS\t\t[\t%GT]\n' ${input_hyb} >> tmp/${output_GT_hyb}
 	else                                                                     
 	    echo "WARNING: More than 10 markers specified for ${scaffold_name}. Using the first 10 markers only!\n\n"
-	    bcftools query -r ${scaffold_name} -f '%CHROM:%POS\t\t[\t%GT]\n' ${input_popA} >> ${output_GT_popA}
-	    bcftools query -r ${scaffold_name} -f '%CHROM:%POS\t\t[\t%GT]\n' ${input_popB} >> ${output_GT_popB}
-	    bcftools query -r ${scaffold_name} -f '%CHROM:%POS\t\t[\t%GT]\n' ${input_hyb} >> ${output_GT_hyb}
+	    bcftools query -r ${scaffold_name} -f '%CHROM:%POS\t\t[\t%GT]\n' ${input_popA} >> tmp/${output_GT_popA}
+	    bcftools query -r ${scaffold_name} -f '%CHROM:%POS\t\t[\t%GT]\n' ${input_popB} >> tmp/${output_GT_popB}
+	    -	    bcftools query -r ${scaffold_name} -f '%CHROM:%POS\t\t[\t%GT]\n' ${input_hyb} >> tmp/${output_GT_hyb}
 	    # sed -i -n '1,11p' ${output_GT_popA}
 	    # sed -i -n '1,11p' ${output_GT_popB}
 	    # sed -i -n '1,11p' ${output_GT_hyb}
 
-	    sed -n '1,11p' ${output_GT_popA} > tmp_A.txt
-	    cat tmp_A.txt > ${output_GT_popA}
-	    sed -n '1,11p' ${output_GT_popB} > tmp_B.txt
-	    cat tmp_B.txt > ${output_GT_popB}
-	    sed -n '1,11p' ${output_GT_hyb} > tmp_hyb.txt
-	    cat tmp_hyb.txt > ${output_GT_hyb}
+	    touch tmp/tmp_A.txt
+	    touch tmp/tmp_B.txt
+	    touch tmp/tmp_hyb.txt
+	    
+	    sed -n '1,11p' tmp/${output_GT_popA} > tmp/tmp_A.txt
+	    cat tmp/tmp_A.txt > tmp/${output_GT_popA}
+	    sed -n '1,11p' tmp/${output_GT_popB} > tmp/tmp_B.txt
+	    cat tmp/tmp_B.txt > tmp/${output_GT_popB}
+	    sed -n '1,11p' tmp/${output_GT_hyb} > tmp/tmp_hyb.txt
+	    cat tmp/tmp_hyb.txt > tmp/${output_GT_hyb}
 	fi
     done < <(echo "${scaffold_info}")
 
@@ -83,14 +91,16 @@ function create_chrom
     	do                                                                             
     	    markers=`bcftools query -r ${scaffold_name} -f '%POS\t' ${input_popA}`     
     	    n_marker=`echo "${markers}" | awk '{print NF}'`                            
-    	    chrom_filename="${scaffold_name}.chrom"                                    
+    	    chrom_filename="${scaffold_name}.chrom"
+            touch tmp/${chrom_filename}
+	    
     	    if [[ ${n_marker} -le 10 ]]                                                
     	    then                                                                       
     		last_marker=`echo "${markers}" | awk '{print ($NF+(10**6))/(10**6)}'`  
     		chrom_length=`echo "${last_marker}/1" | bc`                            
     		# chrom_info=`echo 1$'\t'${chrom_length}$'\t'${recom_rate}$'\t'${n_marker}$'\t'${markers}`
     		# echo "${chrom_info}" > ${chrom_filename}		
-		printf "1\t${chrom_length}\t${recom_rate}\t${n_marker}\t${markers}\n" > ${chrom_filename}
+		printf "1\t${chrom_length}\t${recom_rate}\t${n_marker}\t${markers}\n" > tmp/${chrom_filename}
     	    else                                                                       
     		truncated_n_marker=10
     		ten_markers=`echo "${markers}" | awk 'BEGIN{ORS="\t"}{for(i=1; i<=10; i++) print $i}'`
@@ -98,7 +108,7 @@ function create_chrom
     		chrom_length=`echo "${last_marker}/1" | bc`
     		# chrom_info=`echo 1$'\t'${chrom_length}$'\t'${recom_rate}$'\t'${truncated_n_marker}$'\t'${ten_markers}`
     		# echo "${chrom_info}" > ${chrom_filename}
-		printf "1\t${chrom_length}\t${recom_rate}\t${truncated_n_marker}\t${ten_markers}\n" > ${chrom_filename}
+		printf "1\t${chrom_length}\t${recom_rate}\t${truncated_n_marker}\t${ten_markers}\n" > tmp/${chrom_filename}
     	    fi
     	    # sed -i "s/${scaffold_name}/1/g" ${chrom_filename}
     	done < <(echo "${input_recom_file}")
@@ -112,14 +122,15 @@ function create_chrom
     	do                                                                           
     	    markers=`bcftools query -r ${scaffold_name} -f '%POS\t' ${input_popA}`     
     	    n_marker=`echo "${markers}" | awk '{print NF}'`                            
-    	    chrom_filename="${scaffold_name}.chrom"                                    
+    	    chrom_filename="${scaffold_name}.chrom"
+            touch tmp/${chrom_filename}
     	    if [[ ${n_marker} -le 10 ]]                                                
     	    then                                                                       
     		last_marker=`echo "${markers}" | awk '{print ($NF+(10**6))/(10**6)}'`  
     		chrom_length=`echo "${last_marker}/1" | bc`                            
     		# chrom_info=`echo 1$'\t'${chrom_length}$'\t'${recom_rate}$'\t'${n_marker}$'\t'${markers}`
     		# echo "${chrom_info}" > ${chrom_filename}
-		printf "1\t${chrom_length}\t${recom_rate}\t${n_marker}\t${markers}\n" > ${chrom_filename}
+		printf "1\t${chrom_length}\t${recom_rate}\t${n_marker}\t${markers}\n" > tmp/${chrom_filename}
     	    else                                                                       
     		truncated_n_marker=10
     		ten_markers=`echo "${markers}" | awk 'BEGIN{ORS="\t"}{for(i=1; i<=10; i++) print $i}'`
@@ -127,7 +138,7 @@ function create_chrom
     		chrom_length=`echo "${last_marker}/1" | bc`
     		# chrom_info=`echo 1$'\t'${chrom_length}$'\t'${recom_rate}$'\t'${truncated_n_marker}$'\t'${ten_markers}`
     		# echo "${chrom_info}" > ${chrom_filename}
-		printf "1\t${chrom_length}\t${recom_rate}\t${truncated_n_marker}\t${ten_markers}\n" > ${chrom_filename}
+		printf "1\t${chrom_length}\t${recom_rate}\t${truncated_n_marker}\t${ten_markers}\n" > tmp/${chrom_filename}
     	    fi
     	    # sed -i "s/${scaffold_name}/1/g" ${chrom_filename}
     	done < <(echo "${scaffold_info}")
@@ -145,18 +156,18 @@ function create_pop_sim
 	hybrid_scaffold_filename="H_${scaffold_name}.GT"
 
 
-	header=`awk 'BEGIN {ORS="\t"}; {print $1}' ${hybrid_scaffold_filename}`        
+	header=`awk 'BEGIN {ORS="\t"}; {print $1}' tmp/${hybrid_scaffold_filename}`        
 	header+=$'\n'                                                                  
-	number_hybrids=`awk '{print NF; exit}' ${hybrid_scaffold_filename}`            
+	number_hybrids=`awk '{print NF; exit}' tmp/${hybrid_scaffold_filename}`            
 	count=0                                                                        
 	for (( j=2; j<=${number_hybrids}; j++))                                        
 	do                                                                             
-	    indv_header=`awk 'BEGIN {ORS="\t"}; {print $1}' ${hybrid_scaffold_filename}`
+	    indv_header=`awk 'BEGIN {ORS="\t"}; {print $1}' tmp/${hybrid_scaffold_filename}`
 	    indv_header+=$'\n'                                                         
 	    indv_count=0                                                               
             
-	    hap1=`awk -v i=$j '{print $1, $i}' ${hybrid_scaffold_filename} | ./scripts/transpose.sh | awk -f ./scripts/get_hyb_diplo.awk | awk '{print $1}'`
-	    hap2=`awk -v i=$j '{print $1, $i}' ${hybrid_scaffold_filename} | ./scripts/transpose.sh | awk -f ./scripts/get_hyb_diplo.awk | awk '{print $2}'`
+	    hap1=`awk -v i=$j '{print $1, $i}' tmp/${hybrid_scaffold_filename} | ./scripts/transpose.sh | awk -f ./scripts/get_hyb_diplo.awk | awk '{print $1}'`
+	    hap2=`awk -v i=$j '{print $1, $i}' tmp/${hybrid_scaffold_filename} | ./scripts/transpose.sh | awk -f ./scripts/get_hyb_diplo.awk | awk '{print $2}'`
 	    hap_1=`echo "ibase=2;${hap1}" | bc`                                        
 	    hap_2=`echo "ibase=2;${hap2}" | bc`                                        
             
@@ -196,14 +207,15 @@ function create_pop_sim
 		
 	    done < <(echo "${all_dip}")                                                
             
-	    indv_filename=`awk -v i=$j 'NR==1{print $i}' ${hybrid_scaffold_filename}`  
-	    indv_filename="${indv_filename}_${scaffold_name}.sim"                      
+	    indv_filename=`awk -v i=$j 'NR==1{print $i}' tmp/${hybrid_scaffold_filename}`  
+	    indv_filename="${indv_filename}_${scaffold_name}.sim"
+	    touch tmp/${indv_filename}
 	    indv_all_dip=`echo "${indv_header}" | ./scripts/transpose.sh`                         
-	    echo "${indv_all_dip}" > "${indv_filename}"
+	    echo "${indv_all_dip}" > tmp/${indv_filename}
 	    
             # grep 'chrom:pos' ${indv_filename} > tmp2.txt
-	    sed "s/${scaffold_name}/1/g" ${indv_filename} > tmp2.txt
-	    cat tmp2.txt > ${indv_filename}
+	    sed "s/${scaffold_name}/1/g" tmp/${indv_filename} > tmp/tmp2.txt
+	    cat tmp/tmp2.txt > tmp/${indv_filename}
 	done
 
 	final_formatted_indv=`echo "${header}" | ./scripts/transpose.sh`
@@ -216,8 +228,8 @@ function create_pop_sim
 	
 	
 	hyb=`echo "${final_formatted_indv}" | ./scripts/transpose.sh | awk -f ./scripts/hap_frequency.awk`  
-	A_pop=`./scripts/transpose.sh ${popA_scaffold_filename} | awk -f ./scripts/hap_frequency.awk`       
-	B_pop=`./scripts/transpose.sh ${popB_scaffold_filename} | awk -f ./scripts/hap_frequency.awk`       
+	A_pop=`./scripts/transpose.sh tmp/${popA_scaffold_filename} | awk -f ./scripts/hap_frequency.awk`       
+	B_pop=`./scripts/transpose.sh tmp/${popB_scaffold_filename} | awk -f ./scripts/hap_frequency.awk`       
 	all_hap=`echo "${A_pop}" | awk '{print $1}'`                                   
 	all_hap="${all_hap}"$'\n'"`echo "${B_pop}" | awk '{print $1}'`"                
 	all_hap="${all_hap}"$'\n'"`echo "${hyb}" | awk '{print $1}'`"                  
@@ -229,9 +241,12 @@ function create_pop_sim
 	
 	A_pop_freq_filename="A_${scaffold_name}.popA"                                  
 	B_pop_freq_filename="B_${scaffold_name}.popB"                                  
+
+	touch tmp/${A_pop_freq_filename}
+	touch tmp/${B_pop_freq_filename}
 	
-	echo "${A_pop_freq}" > ${A_pop_freq_filename}                                  
-	echo "${B_pop_freq}" > ${B_pop_freq_filename}    
+	echo "${A_pop_freq}" > tmp/${A_pop_freq_filename}                                  
+	echo "${B_pop_freq}" > tmp/${B_pop_freq_filename}    
 
     done < <(echo "${scaffold_info}")
 }
@@ -248,21 +263,24 @@ function create_lklhd
 	hybrid_scaffold_filename="H_${scaffold_name}.GT"
 	chrom_filename="${scaffold_name}.chrom"
 	
-	number_hybrids=`awk '{print NF; exit}' ${hybrid_scaffold_filename}`
+	number_hybrids=`awk '{print NF; exit}' tmp/${hybrid_scaffold_filename}`
 	count=0
 	for (( j=2; j<=${number_hybrids}; j++))
 	do
 	    
-	    hybrid_name=`awk -v i=$j 'NR==1{print $i}' ${hybrid_scaffold_filename}`
+	    hybrid_name=`awk -v i=$j 'NR==1{print $i}' tmp/${hybrid_scaffold_filename}`
 	    hybrid_scaffold_sim_filename="${hybrid_name}_${scaffold_name}.sim"
 	    hybrid_scaffold_out_filename="${hybrid_name}_${scaffold_name}.out"
 
+	    touch tmp/${hybrid_scaffold_out_filename}
 
-	    ./mongrail -c ${chrom_filename}  -A ${A_freq_scaffold_filename} -B ${B_freq_scaffold_filename} -i ${hybrid_scaffold_sim_filename} -o ${hybrid_scaffold_out_filename} &&
+	    ./mongrail -c tmp/${chrom_filename}  -A tmp/${A_freq_scaffold_filename} -B tmp/${B_freq_scaffold_filename} -i tmp/${hybrid_scaffold_sim_filename} -o tmp/${hybrid_scaffold_out_filename} &&
 		hybrid_lklhd_filename="${hybrid_name}.lklhd"
-	    columns_A_to_F=`awk -f ./scripts/sum_all_dip.awk ${hybrid_scaffold_out_filename}`
+
+	    touch tmp/${hybrid_lklhd_filename}
+	    columns_A_to_F=`awk -f ./scripts/sum_all_dip.awk tmp/${hybrid_scaffold_out_filename}`
 	    output=`echo ${scaffold_name}$'\t'"${columns_A_to_F}"`
-	    echo "${output}" >> ${hybrid_lklhd_filename}
+	    echo "${output}" >> tmp/${hybrid_lklhd_filename}
 
 	done
     done < <(echo "${scaffold_info}")
@@ -277,6 +295,7 @@ function create_PostProb
     sample_hyb=`bcftools query -l ${input_hyb} | awk '{print $1}'`
     verbose_output="post_prob.txt"
     output="output.txt"
+
     post_prob_all_strings="Indiv PostPr(a) PostPr(b) PostPr(c) PostPr(d) PostPr(e) PostPr(f)"
     post_prob_all_strings+=$'\n'
     while read -r hybrid_name
@@ -284,7 +303,7 @@ function create_PostProb
 	hybrid_lklhd_filename="${hybrid_name}.lklhd"
 	header="Indiv: ${hybrid_name}"
 	echo -e "${header}\n" >> ${verbose_output}
-	post_prob_output=`awk -f ./scripts/post_prob.awk ${hybrid_lklhd_filename}`
+	post_prob_output=`awk -f ./scripts/post_prob.awk tmp/${hybrid_lklhd_filename}`
 	echo "${post_prob_output}" | column -t >> ${verbose_output}
 	echo -e "\n\n" >> ${verbose_output}
 	last_line=`echo "${post_prob_output}" | tail -1 | sed "s/PostProb(all)/${hybrid_name}/g"`
@@ -357,8 +376,20 @@ then
 fi                       
 
 
-echo "$(date +%F)" > post_prob.txt
-echo "$(date +%F)" > output.txt 
+if [ -d "./tmp" ]
+then
+    rm -r ./tmp
+    mkdir tmp
+else
+    mkdir tmp
+fi
+
+
+
+echo "$(date '+DATE: %F%nTIME: %H:%M:%S')" > post_prob.txt
+echo "$(date '+DATE: %F%nTIME: %H:%M:%S')" > output.txt
+printf "\n" >> post_prob.txt
+printf "\n" >> output.txt
 
 no_marker_scaffold=`bcftools query -f '%CHROM\n' ${popA} | uniq -c`
 # scaffold_name=`echo "${no_marker_scaffold}" | awk 'BEGIN{ORS="\n"}{print $2}'`
@@ -373,15 +404,23 @@ create_lklhd "${chrom_name}"
 create_PostProb ${hybrid}
 
 
+# Deleting temporary files
 
-mkdir tmp
-mv *.chrom ./tmp/
-mv *.popA ./tmp/
-mv *.popB ./tmp/
-mv *.GT ./tmp/
-mv *.sim ./tmp/
-mv *.out ./tmp/
-mv *.lklhd ./tmp/
+rm tmp/tmp2.txt
 
-rm tmp2.txt
+if [ -f "tmp/tmp_A.txt" ]
+then
+    rm tmp/tmp_A.txt
+fi
+
+if [ -f "tmp/tmp_B.txt" ]
+then
+    rm tmp/tmp_B.txt
+fi
+
+if [ -f "tmp/tmp_hyb.txt" ]
+then
+    rm tmp/tmp_hyb.txt
+fi
+
 echo ""

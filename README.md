@@ -14,7 +14,23 @@ The current version of Mongrail is available from ?
 
 ## Manual
 
-The program manual is available at ?
+The program manual is available at the [Mongrail wiki](https://github.com/mongrail/mongrail/wiki).
+
+## Quickstart
+
+### To Download the program
+
+```
+wget ? ; tar -xvzf mongrail-*.tar.gz ; cd mongrail-* ; make all
+
+```
+
+### To run the program
+
+```
+./run_mongrail.sh -A examples/small_owl/BO_phased_small.vcf.gz -B examples/small_owl/SO_phased_small.vcf.gz -i examples/small_owl/hybrids_small.vcf.gz -r 1.5
+
+```
 
 ## Reporting Bugs
 
