@@ -385,6 +385,9 @@ else
 fi
 
 
+tabix -f ${popA}
+tabix -f ${popB}
+tabix -f ${hybrid}
 
 echo "$(date '+DATE: %F%nTIME: %H:%M:%S')" > post_prob.txt
 echo "$(date '+DATE: %F%nTIME: %H:%M:%S')" > output.txt
