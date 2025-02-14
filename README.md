@@ -36,7 +36,7 @@ wget https://github.com/mongrail/mongrail/archive/refs/tags/v1.0.2.tar.gz ; tar 
 
 A list of known bugs can be found in the BUGS file. Details of compilation problems can be found in the INSTALL file.
 
-If you find a bug which is not listed in these files please report it to snechakraborty@ucdavis.edu.
+If you find a bug which is not listed in these files please report it to chakraborty@g.ucla.edu OR sneha.chakraborty.ucd@gmail.com.
 
 All bug reports should include:
 
