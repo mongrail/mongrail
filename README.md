@@ -1,4 +1,4 @@
-NOTE: The mongrail program has been replaced by mongrail2 available at [https://github.com/mongrail/mongrail2](https://github.com/mongrail/mongrail2). This version is retained only for verifying results from the original program.
+NOTE: The mongrail program has been replaced by mongrail2 available at [https://github.com/mongrail/mongrail2](https://github.com/mongrail/mongrail2). This version is retained only for verifying results from the original program. The mongrail program is no longer actively maintained and should not be used for data analysis intended for publication.
 
 # MONGRAIL
 
