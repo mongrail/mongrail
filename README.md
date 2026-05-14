@@ -1,3 +1,5 @@
+NOTE: The mongrail program has been replaced by mongrail2 available at [https://github.com/mongrail/mongrail2](https://github.com/mongrail/mongrail2). This version is retained only for verifying results from the original program.
+
 # MONGRAIL
 
 This is Mongrail, a program for identifying hybrids and back crosses using genomic data.
